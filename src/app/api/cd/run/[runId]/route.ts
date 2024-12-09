@@ -6,9 +6,9 @@ const cd = new ComfyDeploy({
 
 export async function GET(
   request: Request,
-  context: { params?: { runId?: string } }
-) {
-  const runId = context.params?.runId;
+  context: { params: { runId: string } }
+): Promise<Response> {
+  const { runId } = context.params;
 
   if (!runId) {
     return new Response("Missing runId parameter", { status: 400 });
