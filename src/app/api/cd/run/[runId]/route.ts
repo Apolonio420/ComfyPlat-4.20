@@ -6,7 +6,7 @@ const cd = new ComfyDeploy({
 
 export async function GET(
   _request: Request,
-  context: { params: { runId: string } }
+  context: { params: Record<string, string> }
 ): Promise<Response> {
   const { runId } = context.params;
 
