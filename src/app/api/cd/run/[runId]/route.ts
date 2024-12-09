@@ -6,13 +6,20 @@ const cd = new ComfyDeploy({
 
 export async function GET(
   _request: Request,
-  { params }: { params: { runId: string } }
-) {
+  context: { params: { runId: string } }
+): Promise<Response> {
+  const { runId } = context.params;
+
+  if (!runId) {
+    return new Response("Missing runId parameter", { status: 400 });
+  }
+
   try {
-    const data = await cd.run.get({
-      runId: params.runId
+    const data = await cd.run.get({ runId });
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
     });
-    return Response.json(data);
   } catch (error) {
     console.error("Error fetching run status:", error);
     return new Response("Error fetching status", { status: 500 });
