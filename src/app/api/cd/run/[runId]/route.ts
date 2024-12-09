@@ -1,22 +1,19 @@
 import { ComfyDeploy } from "comfydeploy";
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const cd = new ComfyDeploy({
   bearer: process.env.COMFY_DEPLOY_API_KEY!,
 });
 
-export async function GET(
-  request: Request,
-  { params }: { params: Record<string, string> }
-): Promise<Response> {
-  // Agregar logs detallados
-  console.log("Request object:", request);
-  console.log("Context params received:", params);
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const { runId } = req.query;
 
-  const runId = params?.runId;
-
-  if (!runId) {
-    console.error("Error: Missing runId parameter.");
-    return new Response("Missing runId parameter", { status: 400 });
+  if (typeof runId !== 'string') {
+    console.error("Error: Missing or invalid runId parameter.");
+    return res.status(400).json({ error: "Missing or invalid runId parameter" });
   }
 
   console.log("Run ID received:", runId);
@@ -25,12 +22,9 @@ export async function GET(
     const data = await cd.run.get({ runId });
     console.log("Data fetched successfully:", data);
 
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching run status:", error);
-    return new Response("Error fetching status", { status: 500 });
+    return res.status(500).json({ error: "Error fetching status" });
   }
 }
