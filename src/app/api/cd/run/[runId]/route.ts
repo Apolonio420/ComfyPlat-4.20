@@ -6,11 +6,13 @@ const cd = new ComfyDeploy({
 
 export async function GET(
   request: Request,
-  context: { params: { runId: string } }
+  { params }: { params: Record<string, string> }
 ) {
+  const { runId } = params;
+
   try {
     const data = await cd.run.get({
-      runId: context.params.runId,
+      runId,
     });
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
