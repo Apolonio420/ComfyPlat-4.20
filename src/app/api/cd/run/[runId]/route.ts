@@ -5,16 +5,16 @@ const cd = new ComfyDeploy({
 });
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { runId: string } }
+  request: Request,
+  context: { params: { runId: string } }
 ) {
   try {
     const data = await cd.run.get({
-      runId: params.runId
+      runId: context.params.runId,
     });
-    return Response.json(data);
+    return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     console.error("Error fetching run status:", error);
     return new Response("Error fetching status", { status: 500 });
   }
-} 
+}
