@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 
 interface MockupDisplayProps {
@@ -8,17 +8,16 @@ interface MockupDisplayProps {
 
 export function MockupDisplay({ imageUrl, onClose }: MockupDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Crear el canvas de Fabric
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: 800,
       height: 800,
     });
 
-    // Cargar la máscara base
     (fabric.Image.fromURL as (
       url: string,
       callback: (img: fabric.Image | null) => void
@@ -26,29 +25,31 @@ export function MockupDisplay({ imageUrl, onClose }: MockupDisplayProps) {
       "/images/creo3001-mask.png",
       (maskImage) => {
         if (maskImage) {
-          maskImage.scaleToWidth(800); // Escalar la máscara al ancho del canvas
+          maskImage.scaleToWidth(800);
           canvas.add(maskImage);
 
-          // Cargar la imagen generada
           (fabric.Image.fromURL as (
             url: string,
             callback: (img: fabric.Image | null) => void
           ) => void)(imageUrl, (generatedImage) => {
             if (generatedImage) {
-              generatedImage.scaleToWidth(400); // Escalar la imagen generada
+              generatedImage.scaleToWidth(400);
               generatedImage.set({
-                left: 200, // Posicionar la imagen en el canvas
+                left: 200,
                 top: 200,
               });
-              canvas.add(generatedImage); // Agregar la imagen al canvas
-              canvas.renderAll(); // Renderizar el canvas
+              canvas.add(generatedImage);
+              canvas.renderAll();
+            } else {
+              setError("Error al cargar la imagen generada.");
             }
           });
+        } else {
+          setError("Error al cargar la máscara.");
         }
       }
     );
 
-    // Limpiar el canvas al desmontar el componente
     return () => {
       canvas.dispose();
     };
@@ -60,7 +61,11 @@ export function MockupDisplay({ imageUrl, onClose }: MockupDisplayProps) {
         <button onClick={onClose} className="mb-4">
           Cerrar
         </button>
-        <canvas ref={canvasRef} />
+        {error ? (
+          <div className="text-red-500">{error}</div>
+        ) : (
+          <canvas ref={canvasRef} />
+        )}
       </div>
     </div>
   );
